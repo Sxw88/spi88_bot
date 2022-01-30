@@ -1,0 +1,13 @@
+-----------------------------
+List of Commands
+-----------------------------
+
+/help - prints out list of available commands
+
+/bop - sends you a random picture of a doggo! :3
+
+/tellip - returns current public IP of the Pi
+
+/joke - tells a random joke <!NSFW warning!>
+
+/truth & /dare - returns a random truth or dare challenge, from a list of predefined challenges
