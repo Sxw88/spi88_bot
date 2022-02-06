@@ -1,11 +1,15 @@
 from telegram.ext import Updater, CallbackContext, InlineQueryHandler, CommandHandler
 from telegram import Update
+import subprocess
 import requests
 import random
 import time
 import re
 
 path_to_bot = "/home/spi/spi88_bot/"
+authorized_IDs = ['[CENSORED]', '[CENSORED]']
+my_token = '[CENSORED]'
+unauthorized_msg = "Your Telegram Chat ID is unauthorized"
 
 def get_url():
     contents = requests.get('https://random.dog/woof.json').json()
@@ -81,6 +85,10 @@ def get_help():
     help_txt.close()
     return contents
 
+def get_ifconfig():
+    contents = subprocess.run(['ifconfig'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    return contents
+
 def bop(update: Update, context: CallbackContext):
     url = get_image_url()
     #chat_id = update.message.chat_id
@@ -111,8 +119,40 @@ def hi(update: Update, context: CallbackContext):
     hi_msg="hi what's up"
     context.bot.send_message(chat_id=update.effective_chat.id, text=hi_msg)
 
+def ifconfig(update: Update, context: CallbackContext):
+    if str(update.effective_chat.id) in authorized_IDs:
+        ifconfig_msg = get_ifconfig()
+        context.bot.send_message(chat_id=update.effective_chat.id, text=ifconfig_msg)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
+
+def restartnm(update: Update, context: CallbackContext):
+    if str(update.effective_chat.id) in authorized_IDs:
+        restartnm_msg = "Attempting to restart Network Manager..."
+        context.bot.send_message(chat_id=update.effective_chat.id, text=restartnm_msg)
+        #run the script to restart NetworkManager
+        path_to_script = path_to_bot + "restartNM.sh"
+        subprocess.run(["sudo", path_to_script])
+        #send second message to indicate attempted restart
+        #timeout error seems to occur at this part, but does not affect the function
+        restartnm_msg = "Recovering from restart attempt: /restartnmlog"
+        context.bot.send_message(chat_id=update.effective_chat.id, text=restartnm_msg)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
+
+def restartnmlog(update: Update, context: CallbackContext):
+    if str(update.effective_chat.id) in authorized_IDs:
+        #read the restartnm.log file
+        path_to_file = path_to_bot + "restartnm.log"
+        read_log = open(path_to_file, 'r')
+        read_log_contents = read_log.read()
+        context.bot.send_message(chat_id=update.effective_chat.id, text=read_log_contents)
+        read_log.close()
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
+
 def main():
-    updater = Updater('[CENSORED]', use_context=True)
+    updater = Updater(my_token, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler('bop',bop))
@@ -122,6 +162,9 @@ def main():
     dp.add_handler(CommandHandler('dare',dare))
     dp.add_handler(CommandHandler('help',helpp))
     dp.add_handler(CommandHandler('hi',hi))
+    dp.add_handler(CommandHandler('ifconfig',ifconfig))
+    dp.add_handler(CommandHandler('restartnm',restartnm))
+    dp.add_handler(CommandHandler('restartnmlog',restartnmlog))
 
     updater.start_polling()
     updater.idle()
