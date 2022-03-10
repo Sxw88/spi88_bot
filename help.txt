@@ -4,11 +4,9 @@ List of Commands
 
 /help - prints out list of available commands
 
-/tellip - returns current public IP of the Pi
+/tech - prints out list of technical commands
 
-/ifconfig - returns output of ifconfig command, authorization needed
-
-/restartnm - restarts NetworkManager, authorization needed
+/hi - says hi
 
 /bop - sends you a random picture of a doggo! :3
 
