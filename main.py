@@ -89,6 +89,13 @@ def get_ifconfig():
     contents = subprocess.run(['ifconfig'], stdout=subprocess.PIPE).stdout.decode('utf-8')
     return contents
 
+def get_tech():
+    path_to_file = path_to_bot + "tech.txt"
+    tech_txt = open(path_to_file, 'r')
+    contents = tech_txt.read()
+    tech_txt.close()
+    return contents
+
 def bop(update: Update, context: CallbackContext):
     url = get_image_url()
     #chat_id = update.message.chat_id
@@ -151,6 +158,30 @@ def restartnmlog(update: Update, context: CallbackContext):
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
+def tech(update: Update, context: CallbackContext):
+    tech_msg = get_tech()
+    context.bot.send_message(chat_id=update.effective_chat.id, text=tech_msg)
+
+def upd_ps_reverse(update: Update, context: CallbackContext):
+    if str(update.effective_chat.id) in authorized_IDs:
+        upd_msg = "Updating [CENSORED] with current IP address..."
+        context.bot.send_message(chat_id=update.effective_chat.id, text=upd_msg)
+        #run the script to update the files
+        path_to_script = path_to_bot + "rvs-ip-update.sh"
+        subprocess.run(["sudo", path_to_script])
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
+
+def upd_ovpn(update: Update, context: CallbackContext):
+    if str(update.effective_chat.id) in authorized_IDs:
+        upd_msg = "Updating [CENSORED] with current IP address..."
+        context.bot.send_message(chat_id=update.effective_chat.id, text=upd_msg)
+        #run the script to update the files
+        path_to_script = path_to_bot + "updOVPN.sh"
+        subprocess.run(["sudo", path_to_script])
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)        
+        
 def main():
     updater = Updater(my_token, use_context=True)
     dp = updater.dispatcher
@@ -165,6 +196,9 @@ def main():
     dp.add_handler(CommandHandler('ifconfig',ifconfig))
     dp.add_handler(CommandHandler('restartnm',restartnm))
     dp.add_handler(CommandHandler('restartnmlog',restartnmlog))
+    dp.add_handler(CommandHandler('tech',tech))
+    dp.add_handler(CommandHandler('upd_ps_reverse',upd_ps_reverse))
+    dp.add_handler(CommandHandler('upd_ovpn',upd_ovpn))
 
     updater.start_polling()
     updater.idle()
