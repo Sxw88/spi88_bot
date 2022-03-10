@@ -1,0 +1,13 @@
+----------------------------
+List of Commands
+----------------------------
+
+/tellip - returns current public IP of the Pi
+
+/ifconfig - returns output of ifconfig command, authorization needed
+
+/restartnm - restarts Network Manager, authorization needed
+
+/upd_ps_reverse - updates [CENSORED] with current IP address, authorization needed
+
+/upd_ovpn - updates [CENSORED] with current IP address, authorization needed
