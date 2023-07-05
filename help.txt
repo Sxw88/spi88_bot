@@ -6,10 +6,14 @@ List of Commands
 
 /tech - prints out list of technical commands
 
+/chatid - returns your current Telegram Chat ID!
+
 /hi - says hi
+
+/roll <int> - rolls a dice with <int> sides
 
 /bop - sends you a random picture of a doggo! :3
 
-/joke - tells a random joke <!NSFW warning!>
+/joke - tells a random joke
 
 /truth & /dare - returns a random truth or dare challenge, from a list of predefined challenges
