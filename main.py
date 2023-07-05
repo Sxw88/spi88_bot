@@ -5,11 +5,50 @@ import requests
 import random
 import time
 import re
+import os
 
-path_to_bot = "/home/spi/spi88_bot/"
-authorized_IDs = ['[CENSORED]', '[CENSORED]']
-my_token = '[CENSORED]'
-unauthorized_msg = "Your Telegram Chat ID is unauthorized"
+
+enc_file = "[location of encrypted token file]"
+key_file = "[location of key to encrypted file]"
+decryption_command = 'openssl enc -d -aes-256-cbc -pbkdf2 -in ' + enc_file + ' -pass file:' + key_file
+my_token = os.popen(decryption_command).read()
+my_token = my_token.rstrip(my_token[-1])
+
+
+path_to_bot = "[replace with actual path to main.py]"
+unauthorized_msg = "Your Telegram Chat ID is unauthorized UnU"
+
+def check_plvl(chatid, plvl=0):
+    str_chatid = str(chatid) # convert to string
+
+    # read file containing authorized users
+    #Privilege lvl2 lowest privilege level
+    if plvl >= 2:
+        plvl2 = []
+        with open(path_to_bot+'authorized/lvl2.lst') as readfile:
+            plvl2 = [line.rstrip() for line in readfile]
+        if str_chatid in plvl2:
+            return True
+
+
+    #Privilege lvl1 middle privilege level
+    if plvl >= 1:
+        plvl1 = []
+        with open(path_to_bot+'authorized/lvl1.lst') as readfile:
+            plvl1 = [line.rstrip() for line in readfile]
+        if str_chatid in plvl1:
+            return True
+
+    # Privilege lvl0 highest privilege level
+    if plvl >= 0:
+        plvl0 = []
+        with open(path_to_bot+'authorized/lvl0.lst') as readfile:
+            plvl0 = [line.rstrip() for line in readfile]
+        if str_chatid in plvl0:
+            return True
+
+    return False
+
 
 def get_url():
     contents = requests.get('https://random.dog/woof.json').json()
@@ -34,7 +73,7 @@ def get_joke():
     querystring = {'format':'txt'}
     headers = {
             'x-rapidapi-host': "jokeapi-v2.p.rapidapi.com",
-            'x-rapidapi-key': "[CENSORED]"
+            'x-rapidapi-key': "[redacted]"
             }
     #contents = requests.get('https://jokeapi-v2.p.rapidapi.com/joke/Any').json()
     contents = requests.request("GET", url, headers=headers, params=querystring)
@@ -96,48 +135,92 @@ def get_tech():
     tech_txt.close()
     return contents
 
+def get_diceroll(dice_sides):
+    if dice_sides > 1:
+        diceroll = random.randint(1,dice_sides)     # roll a random number for the dice
+    else:
+        diceroll = "A dice cannot have less than 2 faces!"
+    return diceroll
+
+
+
 def bop(update: Update, context: CallbackContext):
-    url = get_image_url()
-    #chat_id = update.message.chat_id
-    #bot.send_photo(chat_id=chat_id, photo=url)
-    context.bot.send_photo(chat_id=update.effective_chat.id, photo=url)
+    if check_plvl(update.effective_chat.id, 1):
+        url = get_image_url()
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=url)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def tellip(update: Update, context: CallbackContext):
-    ip_add = get_my_ip()
-    context.bot.send_message(chat_id=update.effective_chat.id, text=ip_add)
+    if check_plvl(update.effective_chat.id, 1):
+        ip_add = get_my_ip()
+        context.bot.send_message(chat_id=update.effective_chat.id, text=ip_add)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def joke(update: Update, context: CallbackContext):
-    joke_msg = get_joke()
-    context.bot.send_message(chat_id=update.effective_chat.id, text=joke_msg)
+    if check_plvl(update.effective_chat.id, 1):
+        joke_msg = get_joke()
+        context.bot.send_message(chat_id=update.effective_chat.id, text=joke_msg)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def truth(update: Update, context: CallbackContext):
-    truth_msg = get_truth()
-    context.bot.send_message(chat_id=update.effective_chat.id, text=truth_msg)
+    if check_plvl(update.effective_chat.id, 2):
+        truth_msg = get_truth()
+        context.bot.send_message(chat_id=update.effective_chat.id, text=truth_msg)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def dare(update: Update, context: CallbackContext):
-    dare_msg = get_dare()
-    context.bot.send_message(chat_id=update.effective_chat.id, text=dare_msg)
+    if check_plvl(update.effective_chat.id, 2):
+        dare_msg = get_dare()
+        context.bot.send_message(chat_id=update.effective_chat.id, text=dare_msg)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def helpp(update: Update, context: CallbackContext):
-    help_msg = get_help()
-    context.bot.send_message(chat_id=update.effective_chat.id, text=help_msg)
+    if check_plvl(update.effective_chat.id, 2):
+        help_msg = get_help()
+        context.bot.send_message(chat_id=update.effective_chat.id, text=help_msg)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def hi(update: Update, context: CallbackContext):
-    hi_msg="hi what's up"
-    context.bot.send_message(chat_id=update.effective_chat.id, text=hi_msg)
+    if check_plvl(update.effective_chat.id, 2):
+        hi_msg="hi what's up"
+        context.bot.send_message(chat_id=update.effective_chat.id, text=hi_msg)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
+
+def roll(update: Update, context: CallbackContext):
+    if check_plvl(update.effective_chat.id, 2):
+        try:
+            dice_roll=get_diceroll(int(context.args[0]))
+        except (IndexError, ValueError):
+            dice_roll='Usage: "/roll <int>" will roll a virtual dice with <int> sides'
+        context.bot.send_message(chat_id=update.effective_chat.id, text=dice_roll)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def ifconfig(update: Update, context: CallbackContext):
-    if str(update.effective_chat.id) in authorized_IDs:
+    if check_plvl(update.effective_chat.id, 0):
         ifconfig_msg = get_ifconfig()
         context.bot.send_message(chat_id=update.effective_chat.id, text=ifconfig_msg)
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
+def chatid(update: Update, context: CallbackContext):
+    if check_plvl(update.effective_chat.id, 1):
+        context.bot.send_message(chat_id=update.effective_chat.id, text=update.effective_chat.id)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
+
 def restartnm(update: Update, context: CallbackContext):
-    if str(update.effective_chat.id) in authorized_IDs:
+    if check_plvl(update.effective_chat.id, 0):
         restartnm_msg = "Attempting to restart Network Manager..."
         context.bot.send_message(chat_id=update.effective_chat.id, text=restartnm_msg)
-        #run the script to restart NetworkManager
+        #``run the script to restart NetworkManager
         path_to_script = path_to_bot + "restartNM.sh"
         subprocess.run(["sudo", path_to_script])
         #send second message to indicate attempted restart
@@ -148,7 +231,7 @@ def restartnm(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def restartnmlog(update: Update, context: CallbackContext):
-    if str(update.effective_chat.id) in authorized_IDs:
+    if check_plvl(update.effective_chat.id, 0):
         #read the restartnm.log file
         path_to_file = path_to_bot + "restartnm.log"
         read_log = open(path_to_file, 'r')
@@ -159,12 +242,15 @@ def restartnmlog(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def tech(update: Update, context: CallbackContext):
-    tech_msg = get_tech()
-    context.bot.send_message(chat_id=update.effective_chat.id, text=tech_msg)
+    if check_plvl(update.effective_chat.id, 0):
+        tech_msg = get_tech()
+        context.bot.send_message(chat_id=update.effective_chat.id, text=tech_msg)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def upd_ps_reverse(update: Update, context: CallbackContext):
-    if str(update.effective_chat.id) in authorized_IDs:
-        upd_msg = "Updating [CENSORED] with current IP address..."
+    if check_plvl(update.effective_chat.id, 0):
+        upd_msg = "Updating PowerShell-Reverse-Shell Payload with current IP address..."
         context.bot.send_message(chat_id=update.effective_chat.id, text=upd_msg)
         #run the script to update the files
         path_to_script = path_to_bot + "rvs-ip-update.sh"
@@ -173,15 +259,16 @@ def upd_ps_reverse(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
 
 def upd_ovpn(update: Update, context: CallbackContext):
-    if str(update.effective_chat.id) in authorized_IDs:
-        upd_msg = "Updating [CENSORED] with current IP address..."
+    if check_plvl(update.effective_chat.id, 0):
+        upd_msg = "Updating OVPN File with current IP address. Check this path for the updated OVPN file: https://" + str(get_my_ip()) + ":58443/files/secret/default-vpn-user.ovpn"
         context.bot.send_message(chat_id=update.effective_chat.id, text=upd_msg)
         #run the script to update the files
         path_to_script = path_to_bot + "updOVPN.sh"
         subprocess.run(["sudo", path_to_script])
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)        
-        
+        context.bot.send_message(chat_id=update.effective_chat.id, text=unauthorized_msg)
+
+
 def main():
     updater = Updater(my_token, use_context=True)
     dp = updater.dispatcher
@@ -193,7 +280,9 @@ def main():
     dp.add_handler(CommandHandler('dare',dare))
     dp.add_handler(CommandHandler('help',helpp))
     dp.add_handler(CommandHandler('hi',hi))
+    dp.add_handler(CommandHandler('roll',roll))
     dp.add_handler(CommandHandler('ifconfig',ifconfig))
+    dp.add_handler(CommandHandler('chatid', chatid))
     dp.add_handler(CommandHandler('restartnm',restartnm))
     dp.add_handler(CommandHandler('restartnmlog',restartnmlog))
     dp.add_handler(CommandHandler('tech',tech))
